@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<br>
+<h1>{{company.name}}</h1>
+
+
+{% for i in jobs %}
+
+<br>
+
+    <p>{{i.job_title}}</p>
+
+    <p>{{i.job_description}}</p>
+
+    <p> {{i.salary}} </p>
+    </br>
+        <a href="{{url_for('editJobItem', company_id=company.id, job_id=i.id)}}">Edit</a>
+    </br>
+    <a href="{{url_for('deleteJobItem', company_id=company.id, job_id=i.id)}}">Delete</a>
+
+</div>
+
+
+{% endfor %}
+</body>
+</html>

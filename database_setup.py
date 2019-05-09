@@ -40,4 +40,31 @@ def add_company():
     session.commit()
 
 
-add_company()
+def add_job():
+    company_id = "2"
+    company_found = session.query(Company).filter_by(id=company_id).one()
+
+    job_title = "UI Software Engineer"
+    job_description = """ Shared Services Engineering (SSE) is looking for a UI Software Engineer who has a passion for working on large scale projects and obsessive about customer/user experiences with compliance and who can help us deliver innovative features in CSEO applications/services. CSEO owns and manages applications and services supporting various domains such as Sales, Marketing, HR, Finance, CELA, Field Users, Employee, SAP, Supply Chain. If you have done great full-stack UI development and you consider yourself a successful UI developer, you will feel right at home in our team. Your work will be the face of the team. It is a fast-paced environment with quick iteration cycles and plenty of exploration in new areas."""
+    job_salary = "75,000"
+    company = company_found
+    job = Item(job_title=job_title,job_description=job_description, salary=job_salary, company=company)
+    session.add(job)
+    session.commit()
+
+def get_companies():
+    companies = session.query(Company).all()
+    for company in companies:
+        print(company.name)
+        print(company.slogan)
+
+def get_jobs():
+    jobs = session.query(Item).all()
+    for job in jobs:
+        print(job.job_title)
+        print(job.job_description)
+        print(job.salary)
+
+
+
+add_job()
