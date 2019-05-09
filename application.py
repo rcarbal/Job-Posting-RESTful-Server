@@ -1,40 +1,54 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template
+from flask import Flask, render_template, request, url_for
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker
+from werkzeug.utils import redirect
+
 from database_setup import Base, Company, Item
 
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///job_postings.db')
+engine = create_engine('sqlite:///job_postings.db?check_same_thread=False')
 Base.metadata.bind = engine
 
-DBsession = scoped_session(sessionmaker(bind=engine))
-session = DBsession()
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
 
 
 @app.route('/')
 @app.route('/companies/<int:company_id>')
-def companies(company_id):
+def single_company(company_id):
     company = session.query(Company).filter_by(id=company_id).one()
     jobs = session.query(Item).filter_by(company_id=company_id)
     return render_template('company.html', company=company, jobs=jobs)
 
 
 # New Company
-@app.route('/company/<int:company_id>/new/')
-def newCompanyJob(company_id):
-    return "page to create a new company job post. Task 1 complete!"
+@app.route('/company/<int:company_id>/new/', methods=['GET', 'POST'])
+def new_company_job(company_id):
+    if request.method == 'POST':
+        description =request.form["description"]
+        name =request.form["name"]
+        salary = request.form["salary"]
+        new_job = Item(job_title=name,
+                       job_description=description,
+                       salary=salary,
+                       company_id=company_id)
+        session.add(new_job)
+        session.commit()
+        return redirect(url_for('single_company', company_id=company_id))
+    else:
+        return render_template('newjobpost.html', company_id=company_id)
 
 
 # Edit company job post
 @app.route('/company/<int:company_id>/<int:job_id>/edit/')
-def editJobItem(company_id, job_id):
+def edit_job_item(company_id, job_id):
     return "page to edit a Job item. Task 2 complete!"
 
 
 @app.route('/company/<int:company_id>/<int:job_id>/delete/')
-def deleteJobItem(company_id, job_id):
+def delete_job_item(company_id, job_id):
     return "page to delete a menu item. Task 3 complete!"
 
 
