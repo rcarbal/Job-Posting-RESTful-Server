@@ -24,11 +24,11 @@ def single_company(company_id):
 
 
 # New Company
-@app.route('/company/<int:company_id>/new/', methods=['GET', 'POST'])
+@app.route('/companies/<int:company_id>/new/', methods=['GET', 'POST'])
 def new_company_job(company_id):
     if request.method == 'POST':
-        description =request.form["description"]
-        name =request.form["name"]
+        description = request.form["description"]
+        name = request.form["name"]
         salary = request.form["salary"]
         new_job = Item(job_title=name,
                        job_description=description,
@@ -42,12 +42,22 @@ def new_company_job(company_id):
 
 
 # Edit company job post
-@app.route('/company/<int:company_id>/<int:job_id>/edit/')
+@app.route('/companies/<int:company_id>/<int:job_id>/edit/', methods=['GET', 'POST'])
 def edit_job_item(company_id, job_id):
-    return "page to edit a Job item. Task 2 complete!"
+    edited_job_post = session.query(Item).filter_by(id=job_id).one()
+    if request.method == 'POST':
+        if request.form['title']:
+            edited_job_post.job_title = request.form['title']
+            edited_job_post.job_description = request.form['description']
+            edited_job_post.salary = request.form['salary']
+        session.add(edited_job_post)
+        session.commit()
+        return redirect(url_for('single_company', company_id=company_id))
+    else:
+        return render_template('editjobpost.html', company_id=company_id, job_ID=edited_job_post)
 
 
-@app.route('/company/<int:company_id>/<int:job_id>/delete/')
+@app.route('/companies/<int:company_id>/<int:job_id>/delete/')
 def delete_job_item(company_id, job_id):
     return "page to delete a menu item. Task 3 complete!"
 

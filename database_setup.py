@@ -64,7 +64,3 @@ def get_jobs():
         print(job.job_title)
         print(job.job_description)
         print(job.salary)
-
-
-
-add_job()

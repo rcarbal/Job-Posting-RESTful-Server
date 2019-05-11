@@ -1,0 +1,20 @@
+<html>
+<body>
+<form action= "{{url_for('edit_job_item', company_id = company_id, job_id=job_ID.id)}}" method = 'POST'>
+
+    <p>Name:</p>
+    <input type = 'text' size='30' name = 'title' value ="{{job_ID.job_title}}">
+    <br>
+    <br>
+    <input type = 'text' size='30' name = 'description' value = "{{job_ID.job_description}}">
+
+    <br>
+    <br>
+    <input type = 'text' size='30' name = 'salary' value = "${{job_ID.salary}}">
+    <br>
+    <br>
+    <input type='submit' value='Edit'>
+</form>
+<a href= "">Cancel</a>
+</body>
+</html>
