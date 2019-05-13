@@ -19,7 +19,8 @@ session = DBSession()
 @app.route('/companies')
 def get_all_companies():
     companies = session.query(Company).first()
-    return('COmpanies')
+    return ('COmpanies')
+
 
 @app.route('/companies/<int:company_id>')
 def single_company(company_id):
@@ -62,9 +63,14 @@ def edit_job_item(company_id, job_id):
         return render_template('editjobpost.html', company_id=company_id, job_ID=edited_job_post)
 
 
-@app.route('/companies/<int:company_id>/<int:job_id>/delete/')
+@app.route('/companies/<int:company_id>/<int:job_id>/delete/', methods=['GET', 'POST'])
 def delete_job_item(company_id, job_id):
-    return "page to delete a menu item. Task 3 complete!"
+    deleted_job_post = session.query(Item).filter_by(id=job_id).one()
+    if request.method == 'POST':
+        session.delete(deleted_job_post)
+        session.commit()
+        return redirect(url_for('single_company', company_id=company_id))
+    return render_template('deletepost.html', company_id=company_id, item=deleted_job_post)
 
 
 if __name__ == '__main__':
