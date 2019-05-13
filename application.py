@@ -16,6 +16,11 @@ session = DBSession()
 
 
 @app.route('/')
+@app.route('/companies')
+def get_all_companies():
+    companies = session.query(Company).first()
+    return('COmpanies')
+
 @app.route('/companies/<int:company_id>')
 def single_company(company_id):
     company = session.query(Company).filter_by(id=company_id).one()
