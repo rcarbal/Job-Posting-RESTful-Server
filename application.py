@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, request, url_for, flash
+from flask import Flask, render_template, request, url_for, flash, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from werkzeug.utils import redirect
@@ -59,7 +59,7 @@ def edit_job_item(company_id, job_id):
             edited_job_post.salary = request.form['salary']
         session.add(edited_job_post)
         session.commit()
-        flash("Edited Job post "+ request.form['title'])
+        flash("Edited Job post " + request.form['title'])
         return redirect(url_for('single_company', company_id=company_id))
     else:
         return render_template('editjobpost.html', company_id=company_id, job_ID=edited_job_post)
@@ -74,6 +74,20 @@ def delete_job_item(company_id, job_id):
         flash("Deleted job post " + deleted_job_post.job_title)
         return redirect(url_for('single_company', company_id=company_id))
     return render_template('deletepost.html', company_id=company_id, item=deleted_job_post)
+
+
+@app.route('/companies/<int:company_id>/posts/JSON')
+def company_posts_json(company_id):
+    # company = session.query(Company).filter_by(id=company_id).one()
+    posts = session.query(Item).filter_by(company_id=company_id).all()
+    return jsonify(JobPosts=[i.serialize for i in posts])
+
+
+@app.route('/companies/<int:company_id>/posts/<int:post_id>/JSON')
+def job_post_json(company_id, post_id):
+    # company = session.query(Company).filter_by(id=company_id).one()
+    post = session.query(Item).filter_by(id=post_id).one()
+    return jsonify(JobPost=post)
 
 
 if __name__ == '__main__':

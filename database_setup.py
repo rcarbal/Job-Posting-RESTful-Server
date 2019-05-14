@@ -25,6 +25,16 @@ class Item(Base):
     company_id = Column(Integer, ForeignKey('company.id'))
     company = relationship(Company)
 
+    @property
+    def serialize(self):
+        return{
+            'name': self.job_title,
+            'description': self.job_description,
+            'id': self.id,
+            'salary': self.salary,
+            'company': self.company_id
+        }
+
 
 engine = create_engine('sqlite:///job_postings.db')
 Base.metadata.create_all(engine)
