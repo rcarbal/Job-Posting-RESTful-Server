@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from werkzeug.utils import redirect
@@ -42,6 +42,7 @@ def new_company_job(company_id):
                        company_id=company_id)
         session.add(new_job)
         session.commit()
+        flash("New job post created!")
         return redirect(url_for('single_company', company_id=company_id))
     else:
         return render_template('newjobpost.html', company_id=company_id)
@@ -58,6 +59,7 @@ def edit_job_item(company_id, job_id):
             edited_job_post.salary = request.form['salary']
         session.add(edited_job_post)
         session.commit()
+        flash("Edited Job post "+ request.form['title'])
         return redirect(url_for('single_company', company_id=company_id))
     else:
         return render_template('editjobpost.html', company_id=company_id, job_ID=edited_job_post)
@@ -69,10 +71,12 @@ def delete_job_item(company_id, job_id):
     if request.method == 'POST':
         session.delete(deleted_job_post)
         session.commit()
+        flash("Deleted job post " + deleted_job_post.job_title)
         return redirect(url_for('single_company', company_id=company_id))
     return render_template('deletepost.html', company_id=company_id, item=deleted_job_post)
 
 
 if __name__ == '__main__':
+    app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host='0.0.0.0', port=5000)

@@ -8,6 +8,15 @@
 <h1>{{company.name}}</h1>
 
 <body>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <ul>
+    {% for message in messages %}
+        <li><string>{{ message }}</string></li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+{% endwith %}
 <a href="{{url_for('new_company_job', company_id = company.id) }}">Create New Job</a>
 
 {% for i in jobs %}

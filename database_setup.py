@@ -45,7 +45,13 @@ def add_job():
     company_found = session.query(Company).filter_by(id=company_id).one()
 
     job_title = "UI Software Engineer"
-    job_description = """ Shared Services Engineering (SSE) is looking for a UI Software Engineer who has a passion for working on large scale projects and obsessive about customer/user experiences with compliance and who can help us deliver innovative features in CSEO applications/services. CSEO owns and manages applications and services supporting various domains such as Sales, Marketing, HR, Finance, CELA, Field Users, Employee, SAP, Supply Chain. If you have done great full-stack UI development and you consider yourself a successful UI developer, you will feel right at home in our team. Your work will be the face of the team. It is a fast-paced environment with quick iteration cycles and plenty of exploration in new areas."""
+    job_description = """Shared Services Engineering (SSE) is looking for a UI Software Engineer who has a passion 
+    for working on large scale projects and obsessive about customer/user experiences with compliance and who can 
+    help us deliver innovative features in CSEO applications/services. CSEO owns and manages applications and 
+    services supporting various domains such as Sales, Marketing, HR, Finance, CELA, Field Users, Employee, SAP, 
+    Supply Chain. If you have done great full-stack UI development and you consider yourself a successful UI 
+    developer, you will feel right at home in our team. Your work will be the face of the team. It is a fast-paced 
+    environment with quick iteration cycles and plenty of exploration in new areas. """
     job_salary = "75,000"
     company = company_found
     job = Item(job_title=job_title,job_description=job_description, salary=job_salary, company=company)
