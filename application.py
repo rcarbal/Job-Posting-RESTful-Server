@@ -2,9 +2,13 @@
 from flask import Flask, render_template, request, url_for, flash, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from urllib3.connectionpool import xrange
 from werkzeug.utils import redirect
 
 from database_setup import Base, Company, Item
+
+from flask import session as login_session
+import random, string
 
 app = Flask(__name__)
 
@@ -19,8 +23,14 @@ session = DBSession()
 @app.route('/companies')
 def get_all_companies():
     companies = session.query(Company).first()
-    return ('COmpanies')
+    return 'Companies'
 
+
+@app.route('/login')
+def show_login():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    login_session['state'] = state
+    return "The current session state token is %s"%login_session['state']
 
 @app.route('/companies/<int:company_id>')
 def single_company(company_id):
