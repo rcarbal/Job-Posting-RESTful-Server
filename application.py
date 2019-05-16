@@ -31,8 +31,8 @@ session = DBSession()
 @app.route('/')
 @app.route('/companies')
 def get_all_companies():
-    companies = session.query(Company).first()
-    return CLIENT_ID
+    companies = session.query(Company)
+    return render_template("index.html", companies=companies)
 
 
 @app.route('/login')

@@ -31,9 +31,7 @@
 
   <script>
     $('#signinButton').click(function () {
-      // signInCallback defined in step 6.
       auth2.grantOfflineAccess().then(signInCallback);
-      console.log("Sign in button clicked");
     });
 
     function signInCallback(authResult) {
@@ -57,7 +55,7 @@
             } else if (authResult['error']) {
               console.log('There was an error: ' + authResult['error'])
             } else {
-              $('#result').html('Failed to make server side call. Cheack you configuration and console')
+              $('#result').html('Failed to make server side call. Check you configuration and console')
             }
           }
         })
