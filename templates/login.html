@@ -50,7 +50,7 @@
             if (result) {
               $('#result').html('Loggin Sucessful! </br>' + result + '</br>Redirecting...');
               setTimeout(function () {
-                window.location.href = "/companies/1";
+                window.location.href = "/";
               }, 4000);
             } else if (authResult['error']) {
               console.log('There was an error: ' + authResult['error'])
