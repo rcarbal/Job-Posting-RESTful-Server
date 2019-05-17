@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+
 from flask import Flask, render_template, request, url_for, flash, jsonify
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from urllib3.connectionpool import xrange
 from werkzeug.utils import redirect
 
-from database_setup import Base, Company, Item
+from database_setup import Base, Company, Item, User
 
 from flask import session as login_session
 import random, string
@@ -21,7 +22,7 @@ CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id
 
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///job_postings.db?check_same_thread=False')
+engine = create_engine('sqlite:///jobpostingwithuser.db?check_same_thread=False')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -31,28 +32,54 @@ session = DBSession()
 @app.route('/')
 @app.route('/companies')
 def get_all_companies():
-    companies = session.query(Company)
-    return render_template("index.html", companies=companies)
+    companies = session.query(Company).order_by(asc(Company.name))
+    if 'username' not in login_session:
+        return render_template('publicindex.html', companies=companies)
+    else:
+        return render_template("index.html", companies=companies)
+
+
+@app.route('/companies/new', methods=['POST', 'GET'])
+def create_new_company():
+    if 'username' not in login_session:
+        return render_template("login.html")
+    if request.method == 'POST':
+        new_company = Company(name=request.form['name'], slogan=request.form['slogan'],
+                              user_id=login_session['user_id'])
+        session.add(new_company)
+        session.commit()
+        flash('New Company %s Successfully Created' % new_company.name)
+        return redirect(url_for('get_all_companies'))
+    else:
+        return render_template("newcompany.html")
 
 
 @app.route('/companies/<int:company_id>')
 def single_company(company_id):
     company = session.query(Company).filter_by(id=company_id).one()
-    jobs = session.query(Item).filter_by(company_id=company_id)
-    return render_template('company.html', company=company, jobs=jobs)
+    creator = get_user_info(company.user_id)
+    jobs = session.query(Item).filter_by(company_id=company_id).all()
+    if 'username' not in login_session or creator.id != login_session['user_id']:
+        return render_template('publiccompany.html', company=company, jobs=jobs, creator=creator)
+    else:
+        return render_template('company.html', company=company, jobs=jobs, creator=creator)
 
 
 # New Company
 @app.route('/companies/<int:company_id>/new/', methods=['GET', 'POST'])
 def new_company_job(company_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
+        company = session.query(Company).filter_by(id=company_id).one()
         description = request.form["description"]
         name = request.form["name"]
         salary = request.form["salary"]
         new_job = Item(job_title=name,
                        job_description=description,
                        salary=salary,
-                       company_id=company_id)
+                       company_id=company_id,
+                       user_id=company.user_id)
         session.add(new_job)
         session.commit()
         flash("New job post created!")
@@ -64,6 +91,8 @@ def new_company_job(company_id):
 # Edit company job post
 @app.route('/companies/<int:company_id>/<int:job_id>/edit/', methods=['GET', 'POST'])
 def edit_job_item(company_id, job_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     edited_job_post = session.query(Item).filter_by(id=job_id).one()
     if request.method == 'POST':
         if request.form['title']:
@@ -80,7 +109,18 @@ def edit_job_item(company_id, job_id):
 
 @app.route('/companies/<int:company_id>/<int:job_id>/delete/', methods=['GET', 'POST'])
 def delete_job_item(company_id, job_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     deleted_job_post = session.query(Item).filter_by(id=job_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    # In case user tries delete via url
+    if deleted_job_post.user_id != login_session['user_id']:
+        return """
+        <script>function myFuntion(){
+        alert('You are not authorized to delete this post. Please create your own post in order to delete');
+        </script><body onload='myFunction()''> 
+        """
     if request.method == 'POST':
         session.delete(deleted_job_post)
         session.commit()
@@ -173,6 +213,13 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+
+    # check if user is in the db
+    user_id = get_user_id(login_session['email'])
+    if not user_id:
+        user_id = create_user(login_session)
+    login_session['user_id'] = user_id
+
     flash("You are now logged in %s" % login_session['username'])
     return "done"
 
@@ -205,6 +252,27 @@ def gdisconnect():
         response = make_response(json.dumps('Failed to revoke token for given user'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
+
+
+def create_user(loggin_session):
+    new_user = User(name=login_session['username'], email=loggin_session['email'], picture=loggin_session['picture'])
+    session.add(new_user)
+    session.commit()
+    user = session.query(User).filter_by(email=loggin_session['email']).one()
+    return user.id
+
+
+def get_user_info(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+
+def get_user_id(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 
 if __name__ == '__main__':

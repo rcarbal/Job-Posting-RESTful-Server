@@ -6,17 +6,14 @@
 </head>
 <body>
 <h1>Companies</h1>
-
 <br>
-<a href="/gdisconnect">Logout</a>
-</br>
-<a href="/companies/new">Create new company</a>
+<a href="/login">Login</a>
+<br>
 {% for i in companies %}
 
 
 </br>
 <a href="{{url_for('single_company', company_id=i.id)}}">{{ i.name }}</a>
-
 
 </br>
 {% endfor %}

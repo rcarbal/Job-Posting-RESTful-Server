@@ -7,12 +7,23 @@ from sqlalchemy import create_engine
 Base = declarative_base()
 
 
+class User(Base):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False)
+    picture = Column(String(350))
+
+
 class Company(Base):
     __tablename__ = 'company'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
     slogan = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
 
 class Item(Base):
@@ -24,10 +35,12 @@ class Item(Base):
     salary = Column(String(8))
     company_id = Column(Integer, ForeignKey('company.id'))
     company = relationship(Company)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
 
     @property
     def serialize(self):
-        return{
+        return {
             'name': self.job_title,
             'description': self.job_description,
             'id': self.id,
@@ -36,23 +49,34 @@ class Item(Base):
         }
 
 
-engine = create_engine('sqlite:///job_postings.db')
+engine = create_engine('sqlite:///jobpostingwithuser.db')
 Base.metadata.create_all(engine)
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+def add_user():
+    name = "Ric"
+    email = "admin@admin.com"
+    picture = "no picture"
+    user = User(name=name, email=email, picture=picture)
+    session.add(user)
+    session.commit()
+
+
 def add_company():
     company_name = "Microsoft"
     slogan = "Be What's Next"
-    my_company = Company(name=company_name, slogan=slogan)
+    user = session.query(User).one()
+    my_company = Company(name=company_name, slogan=slogan, user=user)
     session.add(my_company)
     session.commit()
 
 
 def add_job():
-    company_id = "2"
+    company_id = "1"
     company_found = session.query(Company).filter_by(id=company_id).one()
+    user = session.query(User).one()
 
     job_title = "UI Software Engineer"
     job_description = """Shared Services Engineering (SSE) is looking for a UI Software Engineer who has a passion 
@@ -64,15 +88,17 @@ def add_job():
     environment with quick iteration cycles and plenty of exploration in new areas. """
     job_salary = "75,000"
     company = company_found
-    job = Item(job_title=job_title,job_description=job_description, salary=job_salary, company=company)
+    job = Item(job_title=job_title, job_description=job_description, salary=job_salary, company=company, user=user)
     session.add(job)
     session.commit()
+
 
 def get_companies():
     companies = session.query(Company).all()
     for company in companies:
         print(company.name)
         print(company.slogan)
+
 
 def get_jobs():
     jobs = session.query(Item).all()
