@@ -10,7 +10,6 @@ from database_setup import Base, Company, Item, User
 
 from flask import session as login_session
 import random, string
-
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
@@ -129,14 +128,14 @@ def delete_job_item(company_id, job_id):
     return render_template('deletepost.html', company_id=company_id, item=deleted_job_post)
 
 
-@app.route('/companies/<int:company_id>/posts/JSON')
+@app.route('/companies/<int:company_id>/JSON')
 def company_posts_json(company_id):
     # company = session.query(Company).filter_by(id=company_id).one()
     posts = session.query(Item).filter_by(company_id=company_id).all()
     return jsonify(JobPosts=[i.serialize for i in posts])
 
 
-@app.route('/companies/<int:company_id>/posts/<int:post_id>/JSON')
+@app.route('/companies/<int:company_id>/<int:post_id>/JSON')
 def job_post_json(company_id, post_id):
     # company = session.query(Company).filter_by(id=company_id).one()
     post = session.query(Item).filter_by(id=post_id).one()
@@ -277,6 +276,8 @@ def get_user_id(email):
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
+    port = 5000
+    host = '127.0.0.1'
     app.debug = True
-    # app.run(host='0.0.0.0', port=5000)
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host='0.0.0.0', port=5000)
+   # app.run(host=host, port=port)

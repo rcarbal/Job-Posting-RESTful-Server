@@ -1,23 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Companies</title>
-</head>
-<body>
-<h1>Companies</h1>
-<br>
-<a href="/login">Login</a>
-<br>
+{% include "header.html" %}
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+      <h1 class=""display-4>Companies</h1>
+  </div>
+</div>
+
+<div class="container">
+    <ul class=""list-group>
 {% for i in companies %}
-
-
-</br>
+<li class="list-group-item">
 <a href="{{url_for('single_company', company_id=i.id)}}">{{ i.name }}</a>
+</li>
 
-</br>
 {% endfor %}
-</body>
+    </ul>
+</div>
 
 
-</html>
+{% include "footer.html" %}

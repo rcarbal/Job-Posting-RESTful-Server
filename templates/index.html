@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Companies</title>
-</head>
-<body>
+{% include "headerloggedin.html" %}
+
 <h1>Companies</h1>
+<div class="container">
 
-<br>
-<a href="/gdisconnect">Logout</a>
-</br>
-<a href="/companies/new">Create new company</a>
+
+    <ul class="list-group">
 {% for i in companies %}
+        <li class="list-group-item">
+            <a href="{{url_for('single_company', company_id=i.id)}}">{{ i.name }}</a>
+        </li>
 
-
-</br>
-<a href="{{url_for('single_company', company_id=i.id)}}">{{ i.name }}</a>
-
-
-</br>
 {% endfor %}
-</body>
+    </ul>
+    <br/>
+    <a class="btn btn-primary" href="/companies/new">Create new company</a>
 
+</div>
 
-</html>
+{% include "footer.html" %}

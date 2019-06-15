@@ -1,45 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Company</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-</head>
-<br>
-<h1>{{company.name}}</h1>
+{% include "header.html" %}
 
-<body>
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-    <ul>
-    {% for message in messages %}
-        <li><string>{{ message }}</string></li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-{% endwith %}
-
-{% for i in jobs %}
-
-<br>
-
-
-
-    <p>{{i.job_title}}</p>
-
-    <p>{{i.job_description}}</p>
-
-    <p> {{i.salary}} </p>
-
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="" display-4>{{company.name}}</h1>
+        <p class="lead">{{company.slogan}}</p>
+    </div>
 </div>
 
 
-{% endfor %}
+<div class="container">
 
-</br>
-</br>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>
+            <string>{{ message }}</string>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
 
-<a href="/">Back</a>
+    <ul class="list-group">
+        {% for i in jobs %}
+        <li class="list-group-item">
+            <h5 class="d-flex w-100 justify-content-between">
+                {{i.job_title}}
+            </h5>
+            <p>{{i.job_description}}</p>
 
-</body>
-</html>
+            <small>$ {{i.salary}} </small>
+        </li>
+
+        {% endfor %}
+    </ul>
+    </br>
+
+    <a class="btn btn-primary" href="/">Back</a>
+
+
+</div>
+
+{% include "footer.html" %}
