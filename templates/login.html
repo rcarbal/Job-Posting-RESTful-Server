@@ -4,18 +4,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Google Login</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <!-- BEGIN Pre-requisites -->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
   </script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
   </script>
+  <!-- END Pre-requisites -->
   <script>
     function start() {
-      gapi.load('auth2', function () {
+      gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
-          client_id: '1006331898993-1vnnh6u1s1ip87n1rdjs6kdmkm2p003s.apps.googleusercontent.com',
-          data_approvalprompt: 'force'
+          client_id: '1006331898993-73di5otcn73k2osnonjud03m1mll7749.apps.googleusercontent.com',
           // Scopes to request in addition to 'profile' and 'email'
           //scope: 'additional_scope'
         });
@@ -25,46 +26,57 @@
 </head>
 
 <body>
-  <button id="signinButton">
-    Sign in with Google
-  </button>
-  <div id="result"></div>
-
-  <script>
+<button id="signinButton">Sign in with Google</button>
+<div id="result"></div>
+<script>
     $('#signinButton').click(function () {
+      // signInCallback defined in step 6.
       auth2.grantOfflineAccess().then(signInCallback);
     });
 
+
+</script>
+<!-- Last part of BODY element in file index.html -->
+<script>
     function signInCallback(authResult) {
       if (authResult['code']) {
-        // Hide google plus sign in button
+
+        // Hide the sign-in button now that the user is authorized, for example:
         $('#signinButton').attr('style', 'display: none');
 
-        //Pass the one-time code into the server
+        // Send the code to the server
         $.ajax({
           type: 'POST',
           url: '/gconnect?state={{STATE}}',
-          processData: false,
+          // Always include an `X-Requested-With` header in every AJAX request,
+          // to protect against CSRF attacks.
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
           contentType: 'application/octet-stream; charset=utf-8',
-          data: authResult['code'],
           success: function (result) {
             if (result) {
-              $('#result').html('Loggin Sucessful! </br>' + result + '</br>Redirecting...');
+              //Handle or verify the server response if necessary
+              $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
               setTimeout(function () {
                 window.location.href = "/";
               }, 4000);
             } else if (authResult['error']) {
-              console.log('There was an error: ' + authResult['error'])
+              console.log('There was an error: ' + authResult['error']);
             } else {
-              $('#result').html('Failed to make server side call. Check you configuration and console')
+              $('#result').html('Failed to make a server-side call. Check your configuration and console.');
             }
-          }
-        })
+          },
+          processData: false,
+          data: authResult['code']
+        });
+      } else {
+        // There was an error.
       }
     }
 
 
-  </script>
+</script>
 
 </body>
 

@@ -1,9 +1,4 @@
-<html>
-<head>
-    <title>Edit Post</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-</head>
-<body>
+{% include "headerloggedin.html" %}
 <form action= "{{url_for('edit_job_item', company_id = company_id, job_id=job_ID.id)}}" method = 'POST'>
 
     <p>Name:</p>
@@ -20,5 +15,4 @@
     <input type='submit' value='Edit'>
 </form>
 <a href= "{{url_for('single_company', company_id = company_id)}}">Cancel</a>
-</body>
-</html>
+{% include "footer.html" %}

@@ -1,0 +1,10 @@
+{% include "header.html" %}
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <div class="display-4">{{job.job_title}}</div>
+        <div class="lead">{{job.company.name}}</div>
+        <div>{{job.job_description}}</div>
+    </div>
+</div>
+{% include "footer.html" %}
