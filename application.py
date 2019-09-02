@@ -28,6 +28,7 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+# Route for all to show all companies
 @app.route('/')
 @app.route('/companies')
 def get_all_companies():
@@ -38,6 +39,7 @@ def get_all_companies():
         return render_template("index.html", companies=companies)
 
 
+# Add a new company
 @app.route('/companies/new', methods=['POST', 'GET'])
 def create_new_company():
     if 'username' not in login_session:
@@ -53,11 +55,13 @@ def create_new_company():
         return render_template("newcompany.html")
 
 
+# Edit company route
 @app.route('/companies/edit', methods=['POST', 'GET'])
 def edit_company():
     return "IN COMPANY EDIT ROUTE"
 
 
+# view specific company by ID
 @app.route('/companies/<int:company_id>')
 def single_company(company_id):
     company = session.query(Company).filter_by(id=company_id).one()
@@ -70,6 +74,7 @@ def single_company(company_id):
         return render_template('company.html', company=company, jobs=jobs, creator=creator)
 
 
+# View specific companies hob post by ID
 @app.route('/companies/<int:company_id>/<int:job_id>', methods=['GET'])
 def single_post(company_id, job_id):
     job_post = session.query(Item).filter_by(id=job_id).one()
@@ -77,7 +82,7 @@ def single_post(company_id, job_id):
         return render_template('job_post.html', company_id=company_id, job=job_post)
 
 
-# New Company
+# Add new company
 @app.route('/companies/<int:company_id>/job/new/', methods=['GET', 'POST'])
 def new_company_job(company_id):
     if 'username' not in login_session:
@@ -119,6 +124,7 @@ def edit_job_item(company_id, job_id):
         return render_template('editjobpost.html', company_id=company_id, job_ID=edited_job_post)
 
 
+# Delete company ob post
 @app.route('/companies/<int:company_id>/<int:job_id>/delete/', methods=['GET', 'POST'])
 def delete_job_item(company_id, job_id):
     if 'username' not in login_session:
@@ -141,6 +147,7 @@ def delete_job_item(company_id, job_id):
     return render_template('deletepost.html', company_id=company_id, item=deleted_job_post)
 
 
+# Get all companies jobs as JSON
 @app.route('/companies/<int:company_id>/JSON')
 def company_posts_json(company_id):
     # company = session.query(Company).filter_by(id=company_id).one()
@@ -148,13 +155,15 @@ def company_posts_json(company_id):
     return jsonify(JobPosts=[i.serialize for i in posts])
 
 
+# Get single job post JSON
 @app.route('/companies/<int:company_id>/<int:post_id>/JSON')
 def job_post_json(company_id, post_id):
     # company = session.query(Company).filter_by(id=company_id).one()
     post = session.query(Item).filter_by(id=post_id).one()
-    return jsonify(JobPost=post)
+    return jsonify(JobPost=post.serialize)
 
 
+# Show Google login page
 @app.route('/login')
 def show_login():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
@@ -163,6 +172,7 @@ def show_login():
     return render_template('login.html', STATE=state)
 
 
+# Google login route
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     if request.args.get('state') != login_session['state']:
@@ -249,6 +259,8 @@ def gconnect():
     print("done!")
     return (output)
 
+
+# Google login route
 @app.route("/gdisconnect")
 def gdisconnect():
     access_token = login_session.get('access_token')
@@ -279,6 +291,7 @@ def gdisconnect():
         return response
 
 
+# Creates session user
 def create_user(loggin_session):
     new_user = User(name=login_session['username'], email=loggin_session['email'], picture=loggin_session['picture'])
     session.add(new_user)
@@ -287,11 +300,13 @@ def create_user(loggin_session):
     return user.id
 
 
+# get user from database
 def get_user_info(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
+# get user id from the database
 def get_user_id(email):
     try:
         user = session.query(User).filter_by(email=email).one()

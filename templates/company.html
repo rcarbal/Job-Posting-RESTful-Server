@@ -26,7 +26,7 @@
         {% for i in jobs %}
 
         <li class="list-group-item">
-            <a href="{{url_for('single_post', company_id = company_id, job_id=job_id.id)}}"><p>{{i.job_title}}</p></a>
+<a href="{{url_for('single_post', company_id =i.company_id, job_id=i.id)}}"><p>{{i.job_title}}</p></a>
 
             <p>{{i.job_description}}</p>
 

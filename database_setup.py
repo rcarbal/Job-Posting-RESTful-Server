@@ -106,3 +106,9 @@ def get_jobs():
         print(job.job_title)
         print(job.job_description)
         print(job.salary)
+
+
+if __name__ == '__main__':
+    add_user()
+    add_company()
+    add_job()
