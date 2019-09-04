@@ -9,7 +9,8 @@ from werkzeug.utils import redirect
 from database_setup import Base, Company, Item, User
 
 from flask import session as login_session
-import random, string
+import random
+import string
 from oauth2client import client
 from oauth2client.client import FlowExchangeError
 import httplib2
@@ -17,11 +18,13 @@ import json
 from flask import make_response
 import requests
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secret.json', 'r')
+                       .read())['web']['client_id']
 
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///jobpostingwithuser.db?check_same_thread=False')
+engine = \
+    create_engine('sqlite:///jobpostingwithuser.db?check_same_thread=False')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -34,25 +37,27 @@ session = DBSession()
 def get_all_companies():
     companies = session.query(Company).order_by(asc(Company.name))
     if 'username' not in login_session:
-        return render_template('publicindex.html', companies=companies)
+        return render_template('publicindex.html', companies=companies,
+                               login=False)
     else:
-        return render_template("index.html", companies=companies)
+        return render_template("index.html", companies=companies, login=True)
 
 
 # Add a new company
 @app.route('/companies/new', methods=['POST', 'GET'])
 def create_new_company():
     if 'username' not in login_session:
-        return render_template("login.html")
+        return render_template("login.html", login=False)
     if request.method == 'POST':
-        new_company = Company(name=request.form['name'], slogan=request.form['slogan'],
+        new_company = Company(name=request.form['name'],
+                              slogan=request.form['slogan'],
                               user_id=login_session['user_id'])
         session.add(new_company)
         session.commit()
         flash('New Company %s Successfully Created' % new_company.name)
         return redirect(url_for('get_all_companies'))
     else:
-        return render_template("newcompany.html")
+        return render_template("newcompany.html", login=True)
 
 
 # Edit company route
@@ -68,18 +73,38 @@ def single_company(company_id):
     creator = get_user_info(company.user_id)
     jobs = session.query(Item).filter_by(company_id=company_id).all()
 
-    if 'username' not in login_session or creator.id != login_session['user_id']:
-        return render_template('publiccompany.html', company=company, jobs=jobs, creator=creator)
+    login = True
+    if 'username' not in login_session:
+        login = False
+
+    if 'username' not in login_session or \
+            creator.id != login_session['user_id']:
+        return render_template('publiccompany.html',
+                               company=company,
+                               jobs=jobs,
+                               creator=creator,
+                               login=login)
     else:
-        return render_template('company.html', company=company, jobs=jobs, creator=creator)
+        login = True
+        return render_template('company.html',
+                               company=company,
+                               jobs=jobs,
+                               creator=creator,
+                               login=login)
 
 
 # View specific companies hob post by ID
 @app.route('/companies/<int:company_id>/<int:job_id>', methods=['GET'])
 def single_post(company_id, job_id):
+    login = True
+    if 'username' not in login_session:
+        login = False
     job_post = session.query(Item).filter_by(id=job_id).one()
     if request.method == 'GET':
-        return render_template('job_post.html', company_id=company_id, job=job_post)
+        return render_template('job_post.html',
+                               company_id=company_id,
+                               job=job_post,
+                               login=login)
 
 
 # Add new company
@@ -102,11 +127,13 @@ def new_company_job(company_id):
         flash("New job post created!")
         return redirect(url_for('single_company', company_id=company_id))
     else:
-        return render_template('newjobpost.html', company_id=company_id)
+        return render_template('newjobpost.html', company_id=company_id,
+                               login=True)
 
 
 # Edit company job post
-@app.route('/companies/<int:company_id>/<int:job_id>/edit/', methods=['GET', 'POST'])
+@app.route('/companies/<int:company_id>/<int:job_id>/edit/',
+           methods=['GET', 'POST'])
 def edit_job_item(company_id, job_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -121,11 +148,15 @@ def edit_job_item(company_id, job_id):
         flash("Edited Job post " + request.form['title'])
         return redirect(url_for('single_company', company_id=company_id))
     else:
-        return render_template('editjobpost.html', company_id=company_id, job_ID=edited_job_post)
+        return render_template('editjobpost.html',
+                               company_id=company_id,
+                               job_ID=edited_job_post,
+                               login=True)
 
 
-# Delete company ob post
-@app.route('/companies/<int:company_id>/<int:job_id>/delete/', methods=['GET', 'POST'])
+# Delete company job post
+@app.route('/companies/<int:company_id>/<int:job_id>/delete/',
+           methods=['GET', 'POST'])
 def delete_job_item(company_id, job_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -136,15 +167,19 @@ def delete_job_item(company_id, job_id):
     if deleted_job_post.user_id != login_session['user_id']:
         return """
         <script>function myFuntion(){
-        alert('You are not authorized to delete this post. Please create your own post in order to delete');
-        </script><body onload='myFunction()''> 
+        alert('You are not authorized to delete this post.
+        Please create your own post in order to delete');
+        </script><body onload='myFunction()''>
         """
     if request.method == 'POST':
         session.delete(deleted_job_post)
         session.commit()
         flash("Deleted job post " + deleted_job_post.job_title)
         return redirect(url_for('single_company', company_id=company_id))
-    return render_template('deletepost.html', company_id=company_id, item=deleted_job_post)
+    return render_template('deletepost.html',
+                           company_id=company_id,
+                           item=deleted_job_post,
+                           login=True)
 
 
 # Get all companies jobs as JSON
@@ -166,10 +201,11 @@ def job_post_json(company_id, post_id):
 # Show Google login page
 @app.route('/login')
 def show_login():
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in xrange(32))
     login_session['state'] = state
     # return "The current session state token is %s"%login_session['state']
-    return render_template('login.html', STATE=state)
+    return render_template('login.html', STATE=state, login=False)
 
 
 # Google login route
@@ -186,7 +222,9 @@ def gconnect():
         # Upgrade the authorization code into a credentials object
         credentials = client.credentials_from_clientsecrets_and_code(
             CLIENT_SECRET_FILE,
-            ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
+            ['https://www.googleapis.com/auth/drive.appdata',
+             'profile',
+             'email'],
             code)
     except FlowExchangeError:
         response = make_response(
@@ -223,8 +261,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_g_id = login_session.get('g_id')
     if stored_access_token is not None and g_id == stored_g_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps(
+            'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -254,7 +292,8 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;' \
+              '-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print("done!")
     return (output)
@@ -286,14 +325,17 @@ def gdisconnect():
         return response
     else:
         # Something went wrong
-        response = make_response(json.dumps('Failed to revoke token for given user'), 401)
+        response = make_response(json.dumps(
+            'Failed to revoke token for given user'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
 
 
 # Creates session user
 def create_user(loggin_session):
-    new_user = User(name=login_session['username'], email=loggin_session['email'], picture=loggin_session['picture'])
+    new_user = User(name=login_session['username'],
+                    email=loggin_session['email'],
+                    picture=loggin_session['picture'])
     session.add(new_user)
     session.commit()
     user = session.query(User).filter_by(email=loggin_session['email']).one()

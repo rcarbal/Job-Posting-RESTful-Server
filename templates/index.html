@@ -1,9 +1,12 @@
-{% include "headerloggedin.html" %}
+{% include "header.html" %}
 
-<h1>Companies</h1>
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+      <h1 class="display-4">Companies</h1>
+  </div>
+</div>
+
 <div class="container">
-
-
     <ul class="list-group">
 {% for i in companies %}
         <li class="list-group-item">
